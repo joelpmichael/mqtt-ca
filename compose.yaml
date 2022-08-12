@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+  mosquitto:
+    image: eclipse-mosquitto:openssl
+    networks:
+      mqtt-noauth:
+        aliases:
+          - mosquitto-noauth
+      outside:
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "9001:9001"
+    configs:
+      - source: mosquitto-config
+        target: /mosquitto/config/mosquitto.conf
+      - source: root-crt
+        target: /ca/root.crt
+
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+      - mqtt-ca:/ca
+    depends_on:
+      - mqtt-ca
+
+  mqtt-ca:
+    image: mqtt-ca:latest
+    configs:
+      - source: root-crt
+        target: /ca/root.crt
+      - source: openssl-cnf
+        target: /ca/openssl.cnf
+      - source: sign-crt
+        target: /ca/certs/sign.crt
+    volumes:
+      - mqtt-ca:/ca
+    networks:
+      - mqtt-noauth
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:
+  mqtt-ca:
+
+
+configs:
+  mosquitto-config:
+    file: ./mosquitto.conf
+  root-crt:
+    file: ./root.crt
+  sign-crt:
+    file: ./sign.crt
+  openssl-cnf:
+    file: ./openssl.cnf
+
+networks:
+  mqtt-noauth:
+  outside:
+    driver: bridge
