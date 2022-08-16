@@ -27,7 +27,7 @@ fi
 
 # check certificate can be verified against the CA
 CERT_REQUIRED=false
-if ! /usr/bin/openssl verify -CAfile /ca/root.crt /ca/certs/sign.crt > /dev/null 2>&1
+if ! /usr/bin/openssl verify -CAfile /ca/certs/root.crt /ca/certs/sign.crt > /dev/null 2>&1
 then
     CERT_REQUIRED=true
 fi
@@ -62,8 +62,8 @@ echo "CA Certificate Validity Period:"
 /usr/bin/openssl x509 -in /ca/certs/sign.crt -noout -dates
 
 # (re-)create certificate chain
-cat /ca/certs/sign.crt /ca/root.crt > /ca/certs/sign-root-chain.crt
-chmod 644 /ca/certs/sign.crt /ca/root.crt /ca/certs/sign-root-chain.crt
+cat /ca/certs/sign.crt /ca/certs/root.crt > /ca/certs/sign-root-chain.crt
+chmod 644 /ca/certs/sign-root-chain.crt
 
 # check for Mosquitto keys, create if necessary
 CERT_REQUIRED=false
@@ -104,6 +104,49 @@ then
         exit 126
     fi
 fi
+
+# check for MQTT-CA keys, create if necessary
+CERT_REQUIRED=false
+if ! /usr/bin/openssl verify -CAfile /ca/certs/sign-root-chain.crt /ca/certs/mqtt-ca.crt > /dev/null 2>&1
+then
+    CERT_REQUIRED=true
+fi
+
+# check public key matches cert
+if [ "$CERT_REQUIRED" = "false" ]
+then
+    /usr/bin/openssl x509 -in /ca/certs/mqtt-ca.crt -noout -pubkey > /ca/certs/mqtt-ca.crt.pubkey
+    if ! /usr/bin/openssl pkey -in /ca/private/mqtt-ca.key -pubout | cmp -s /ca/certs/mqtt-ca.crt.pubkey
+    then
+        CERT_REQUIRED=true
+    fi
+fi
+
+if [ "$CERT_REQUIRED" = "true" ]
+then
+    /usr/bin/openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:2048 -out /ca/private/mqtt-ca.key
+    chown 0:1883 /ca/private/mqtt-ca.key
+    chmod 440 /ca/private/mqtt-ca.key
+    /usr/bin/openssl req -config /ca/openssl.cnf -new -sha256 -key /ca/private/mqtt-ca.key -out /ca/csr/mqtt-ca.csr -batch -subj "/C=$(grep countryName_default /ca/openssl.cnf | cut -d= -f2 | sed 's,^\s*,,')/ST=$(grep stateOrProvinceName_default /ca/openssl.cnf | cut -d= -f2 | sed 's,^\s*,,')/L=$(grep localityName_default /ca/openssl.cnf | cut -d= -f2 | sed 's,^\s*,,')/O=$(grep 0.organizationName_default /ca/openssl.cnf | cut -d= -f2 | sed 's,^\s*,,')/OU=$(grep organizationalUnitName_default /ca/openssl.cnf | cut -d= -f2 | sed 's,^\s*,,')/CN=mqtt-ca"
+    /usr/bin/openssl ca -config /ca/openssl.cnf -extensions server_cert -days 1 -notext -md sha256 -in /ca/csr/mqtt-ca.csr -out /ca/certs/mqtt-ca.crt -batch
+    chown 0:1883 /ca/certs/mqtt-ca.crt
+    chmod 440 /ca/certs/mqtt-ca.crt
+    cat /ca/certs/mqtt-ca.crt /ca/certs/sign.crt > /ca/certs/tmp
+    cat /ca/certs/tmp > /ca/certs/mqtt-ca.crt
+    if ! /usr/bin/openssl verify -CAfile /ca/certs/sign-root-chain.crt /ca/certs/mqtt-ca.crt > /dev/null 2>&1
+    then
+        echo "!!! FAILED TO GENERATE MQTT-CA PROVISIONING CERTIFICATE !!!"
+        echo
+        echo "Check validity of certs inside /ca, especially /ca/certs/sign-root-chain.crt"
+        echo
+        echo "Pausing for 24 hours, then exiting"
+        sleep 86400
+        exit 126
+    fi
+fi
+
+/app/mqtt-ca.py monitor /ca/certs/mosquitto.crt /ca/private/mosquitto.key
+/app/mqtt-ca.py monitor /ca/certs/mqtt-ca.crt /ca/private/mqtt-ca.key
 
 chmod +x "$1"
 exec "$@"

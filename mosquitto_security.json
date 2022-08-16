@@ -8,6 +8,18 @@
                     "rolename": "admin"
                 }
             ]
+        },
+        {
+            "username": "mqtt-ca",
+            "textName": "MQTT Cert Authority",
+            "roles": [
+                {
+                    "rolename": "mqtt-ca-admin"
+                },
+                {
+                    "rolename": "mqtt-ca-client"
+                }
+            ]
         }
     ],
     "groups": [
@@ -64,6 +76,61 @@
                 {
                     "acltype": "unsubscribePattern",
                     "topic": "#",
+                    "allow": true
+                }
+            ]
+        },
+        {
+            "rolename": "mqtt-ca-admin",
+            "acls": [
+                {
+                    "acltype": "publishClientSend",
+                    "topic": "/mqtt-ca/+/cert",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientSend",
+                    "topic": "/mqtt-ca/timestamp-utc",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientReceive",
+                    "topic": "/mqtt-ca/+/csr",
+                    "allow": true
+                },
+                {
+                    "acltype": "subscribePattern",
+                    "topic": "/mqtt-ca/+/csr",
+                    "allow": true
+                }
+            ]
+        },
+        {
+            "rolename": "mqtt-ca-client",
+            "acls": [
+                {
+                    "acltype": "publishClientSend",
+                    "topic": "/mqtt-ca/mqtt-ca-client/csr",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientReceive",
+                    "topic": "/mqtt-ca/timestamp-utc",
+                    "allow": true
+                },
+                {
+                    "acltype": "subscribePattern",
+                    "topic": "/mqtt-ca/timestamp-utc",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientReceive",
+                    "topic": "/mqtt-ca/mqtt-ca-client/cert",
+                    "allow": true
+                },
+                {
+                    "acltype": "subscribePattern",
+                    "topic": "/mqtt-ca/mqtt-ca-client/cert",
                     "allow": true
                 }
             ]

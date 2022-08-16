@@ -28,7 +28,7 @@ services:
     image: mqtt-ca:latest
     configs:
       - source: root-crt
-        target: /ca/root.crt
+        target: /ca/certs/root.crt
       - source: openssl-cnf
         target: /ca/openssl.cnf
       - source: sign-crt
