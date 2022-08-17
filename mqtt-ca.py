@@ -2,27 +2,21 @@
 
 import ssl
 import time
+import logging
 
 import paho.mqtt.client as mqtt
 
-from MQTT_CA import daemon, monitor, provision
-
-# The callback for when the client receives a CONNACK response from the server.
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
-
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    client.subscribe("/mqtt-ca/+/csr")
-
-# The callback for when a PUBLISH message is received from the server.
-def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+from MQTT_CA import config, daemon, monitor, provision
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='MQTT-CA application control')
+    parser.add_argument('--config-file', default="config.json")
+    parser.add_argument('--log-level', default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
+    parser.add_argument('--log-dest', default="CONSOLE", nargs=1)
+
     subparser = parser.add_subparsers()
+
     parser_daemon = subparser.add_parser('daemon')
     parser_daemon.set_defaults(func=daemon.run)
     
@@ -36,6 +30,9 @@ if __name__ == "__main__":
     parser_provision.set_defaults(func=provision.run)
 
     args = parser.parse_args()
+    config.log_start(args.log_level, args.log_dest)
+    logger = logging.getLogger(__name__)
+    config.conf_load(args.config_file)
     args.func(args)
     exit()
     

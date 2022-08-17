@@ -1,3 +1,8 @@
+import logging
+logger = logging.getLogger(__name__)
+
+from MQTT_CA import mqtt
+
 def run(args):
-    print('monitor.run')
-    print(args)
+    logger.info("Starting MONITOR mode")
+    logger.debug("MONITOR args:{}".format(args))

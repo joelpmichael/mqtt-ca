@@ -1,0 +1,14 @@
+{
+    "mqtt": {
+        "hostname": "mosquitto",
+        "port": 8883,
+        "certfile": "/ca/certs/mqtt-ca.crt",
+        "keyfile": "/ca/private/mqtt-ca.key",
+        "cacert": "/ca/certs/root.crt",
+        "insecure": false
+    },
+    "log": {
+        "output": "CONSOLE",
+        "level": "WARNING"
+    }
+}

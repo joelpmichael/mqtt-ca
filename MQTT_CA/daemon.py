@@ -1,3 +1,8 @@
+import logging
+logger = logging.getLogger(__name__)
+
+from MQTT_CA import mqtt
+
 def run(args):
-    print('daemon.run')
-    print(args)
+    logger.info("Starting DAEMON mode")
+    logger.debug("DAEMON args:{}".format(args))
