@@ -2,13 +2,36 @@
     "mqtt": {
         "hostname": "mosquitto",
         "port": 8883,
+        "keepalive": 60,
+        "username": null,
+        "password": null,
         "certfile": "/ca/certs/mqtt-ca.crt",
         "keyfile": "/ca/private/mqtt-ca.key",
         "cacert": "/ca/certs/root.crt",
-        "insecure": false
+        "insecure": false,
+        "reconnect_maxdelay": 60
     },
     "log": {
         "output": "CONSOLE",
         "level": "WARNING"
-    }
+    },
+    "daemon": {
+        "mosquitto_subjectAltName": [
+            "DNS:mqtt.internal",
+            "IP:127.0.0.1",
+            "IP:192.168.0.2"
+        ],
+        "expiry": {
+            "days": 90
+        }
+    },
+    "monitor": {
+        "refresh": {
+            "days": 7,
+            "hours": 0,
+            "minutes": 0,
+            "seconds": 0
+        }
+    },
+    "provision": {}
 }

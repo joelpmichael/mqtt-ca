@@ -148,5 +148,4 @@ fi
 /app/mqtt-ca.py monitor /ca/certs/mosquitto.crt /ca/private/mosquitto.key
 /app/mqtt-ca.py monitor /ca/certs/mqtt-ca.crt /ca/private/mqtt-ca.key
 
-chmod +x "$1"
 exec "$@"

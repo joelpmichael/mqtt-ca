@@ -58,15 +58,25 @@ def log_config(log_conf):
                 root_logger.setLevel(numeric_level)
                 
     logger.debug("Logging configuration complete")
-
-    
     
 def conf_load(file):
-    logger.info("Reading config file {}".format(file))
+    global conf
+    logger.info("Loading configuration file {}".format(file))
     with open(file, "r") as cfgfile:
         conf = json.load(cfgfile)
 
     if "log" in conf.keys():
         log_config(conf["log"])
 
-    print(conf)
+    logger.debug("Configuration: {}".format(conf))
+    logger.debug("Configuration loaded")
+
+def get_config(module):
+    logger.debug("get_config {}".format(module))
+    if module in conf.keys():
+        logger.debug("module found")
+        return conf[module]
+    else:
+        logger.debug("module NOT found")
+        logger.debug("conf: {}".format(conf))
+        return {}
