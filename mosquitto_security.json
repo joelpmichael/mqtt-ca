@@ -6,6 +6,12 @@
             "roles": [
                 {
                     "rolename": "admin"
+                },
+                {
+                    "rolename": "mqtt-ca-client-mosquitto"
+                },
+                {
+                    "rolename": "mqtt-ca-client-mqtt-ca"
                 }
             ]
         },
@@ -15,9 +21,6 @@
             "roles": [
                 {
                     "rolename": "mqtt-ca-admin"
-                },
-                {
-                    "rolename": "mqtt-ca-client"
                 }
             ]
         }
@@ -116,11 +119,11 @@
             ]
         },
         {
-            "rolename": "mqtt-ca-client",
+            "rolename": "mqtt-ca-client-mqtt-ca",
             "acls": [
                 {
                     "acltype": "publishClientSend",
-                    "topic": "mqtt-ca/mqtt-ca-client/csr",
+                    "topic": "mqtt-ca/mqtt-ca/csr",
                     "allow": true
                 },
                 {
@@ -145,12 +148,57 @@
                 },
                 {
                     "acltype": "publishClientReceive",
-                    "topic": "mqtt-ca/mqtt-ca-client/cert",
+                    "topic": "mqtt-ca/mqtt-ca/cert",
                     "allow": true
                 },
                 {
                     "acltype": "subscribePattern",
-                    "topic": "mqtt-ca/mqtt-ca-client/cert",
+                    "topic": "mqtt-ca/mqtt-ca/cert",
+                    "allow": true
+                },
+                {
+                    "acltype": "unsubscribePattern",
+                    "topic": "#",
+                    "allow": true
+                }
+            ]
+        },
+        {
+            "rolename": "mqtt-ca-client-mosquitto",
+            "acls": [
+                {
+                    "acltype": "publishClientSend",
+                    "topic": "mqtt-ca/mosquitto/csr",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientReceive",
+                    "topic": "mqtt-ca/timestamp-utc",
+                    "allow": true
+                },
+                {
+                    "acltype": "subscribePattern",
+                    "topic": "mqtt-ca/timestamp-utc",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientReceive",
+                    "topic": "mqtt-ca/online",
+                    "allow": true
+                },
+                {
+                    "acltype": "subscribePattern",
+                    "topic": "mqtt-ca/online",
+                    "allow": true
+                },
+                {
+                    "acltype": "publishClientReceive",
+                    "topic": "mqtt-ca/mosquitto/cert",
+                    "allow": true
+                },
+                {
+                    "acltype": "subscribePattern",
+                    "topic": "mqtt-ca/mosquitto/cert",
                     "allow": true
                 },
                 {

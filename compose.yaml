@@ -3,9 +3,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto:openssl
     networks:
-      mqtt-noauth:
-        aliases:
-          - mosquitto-noauth
+      inside:
       outside:
     ports:
       - "1883:1883"
@@ -33,10 +31,13 @@ services:
         target: /ca/openssl.cnf
       - source: sign-crt
         target: /ca/certs/sign.crt
+      - source: mqttca-conf
+        target: /app/config.json
     volumes:
       - mqtt-ca:/ca
     networks:
-      - mqtt-noauth
+      inside:
+
 
 volumes:
   mosquitto-data:
@@ -53,8 +54,10 @@ configs:
     file: ./sign.crt
   openssl-cnf:
     file: ./openssl.cnf
+  mqttca-conf:
+    file: ./config.json
 
 networks:
-  mqtt-noauth:
+  inside:
   outside:
     driver: bridge

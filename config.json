@@ -7,31 +7,48 @@
         "password": null,
         "certfile": "/ca/certs/mqtt-ca.crt",
         "keyfile": "/ca/private/mqtt-ca.key",
+        "keyfile_password": null,
         "cacert": "/ca/certs/root.crt",
         "insecure": false,
         "reconnect_maxdelay": 60
     },
     "log": {
         "output": "CONSOLE",
-        "level": "WARNING"
+        "level": "INFO"
     },
     "daemon": {
         "mosquitto_subjectAltName": [
-            "DNS:mqtt.internal",
+            "DNS:localhost",
             "IP:127.0.0.1",
+            "IP:::1",
+            "DNS:things.local",
             "IP:192.168.0.2"
         ],
         "expiry": {
             "days": 90
-        }
+        },
+        "signcert": "/ca/certs/SIGN.crt",
+        "signkey": "/ca/private/SIGN.key",
+        "signkey_password": null
     },
     "monitor": {
         "refresh": {
             "days": 7,
             "hours": 0,
-            "minutes": 0,
-            "seconds": 0
-        }
+            "minutes": 0
+        },
+        "skew_warn": {
+            "hours": 0,
+            "minutes": 10
+        },
+        "algorithm": "rsa",
+        "keylen": 2048
     },
-    "provision": {}
+    "provision": {
+        "algorithm": "rsa",
+        "keylen": 2048,
+        "expiry": {
+            "days": 2
+        }
+    }
 }

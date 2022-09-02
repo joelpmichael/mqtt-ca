@@ -1,16 +1,21 @@
-from distutils.command.clean import clean
 import logging
+
 logger = logging.getLogger(__name__)
 
 from MQTT_CA import config, mqconn
+
 mqtt_config = {}
+mqconn_configured = False
 
 import paho.mqtt.client as mqtt
+
 
 def connect(mq: mqtt.Client):
     logger.info("Starting MQTT connection")
 
     global mqtt_config
+    global mqconn_configured
+    
     mqtt_config = config.get_config("mqtt")
     logger.debug("MQTT config: {}".format(mqtt_config))
 
@@ -66,6 +71,10 @@ def connect(mq: mqtt.Client):
     if "keyfile" in mqtt_config.keys():
         mqtt_keyfile = mqtt_config['keyfile']
         logger.info("Setting MQTT key file to {}".format(mqtt_keyfile))
+    mqtt_keyfile_password = None
+    if "keyfile_password" in mqtt_config.keys():
+        mqtt_keyfile_password = mqtt_config['keyfile_password']
+        logger.info("Setting MQTT key file password")
     mqtt_cacert = None
     if "cacert" in mqtt_config.keys():
         mqtt_cacert = mqtt_config['cacert']
@@ -77,9 +86,10 @@ def connect(mq: mqtt.Client):
     else:
         logger.info("Disabling MQTT TLS mode")
         
-    if mqtt_tls_mode == True:
-        mq.tls_set(ca_certs=mqtt_cacert, certfile=mqtt_certfile, keyfile=mqtt_keyfile)
+    if mqtt_tls_mode == True and mqconn_configured == False:
+        mq.tls_set(ca_certs=mqtt_cacert, certfile=mqtt_certfile, keyfile=mqtt_keyfile, keyfile_password=mqtt_keyfile_password)
         mq.tls_insecure_set(mqtt_insecure)
         
     mq.connect_async(host=mqtt_host, port=mqtt_port, keepalive=mqtt_keepalive, clean_start=False)
     mq.loop_start()
+    mqconn_configured = True

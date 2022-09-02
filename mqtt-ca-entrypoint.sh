@@ -4,6 +4,12 @@ echo "MQTT-CA ENTRYPOINT RUNNING"
 echo "=========================="
 echo
 
+# check for mosquitto_security.json config file
+if [ ! -f /ca/mosquitto_security.json ]
+then
+    cp /app/mosquitto_security.json /ca/mosquitto_security.json
+fi
+
 # check that /ca structure has been set up
 for dir in certs crl csr newcerts private
 do
@@ -145,7 +151,6 @@ then
     fi
 fi
 
-/app/mqtt-ca.py monitor /ca/certs/mosquitto.crt /ca/private/mosquitto.key
-/app/mqtt-ca.py monitor /ca/certs/mqtt-ca.crt /ca/private/mqtt-ca.key
+/app/mqtt-ca.py --config=/app/config.json --log-level=INFO --log-dest=/ca/monitor-mosquitto.log monitor /ca/certs/mosquitto.crt /ca/private/mosquitto.key
 
 exec "$@"

@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import json
@@ -61,17 +62,18 @@ def log_config(log_conf):
     
 def conf_load(file):
     global conf
-    logger.info("Loading configuration file {}".format(file))
     with open(file, "r") as cfgfile:
         conf = json.load(cfgfile)
 
     if "log" in conf.keys():
         log_config(conf["log"])
 
+    logger.info("Configuration file {} loaded".format(file))
     logger.debug("Configuration: {}".format(conf))
-    logger.debug("Configuration loaded")
+    
 
 def get_config(module):
+    global conf
     logger.debug("get_config {}".format(module))
     if module in conf.keys():
         logger.debug("module found")
