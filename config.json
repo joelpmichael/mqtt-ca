@@ -14,7 +14,7 @@
     },
     "log": {
         "output": "CONSOLE",
-        "level": "INFO"
+        "level": "DEBUG"
     },
     "daemon": {
         "mosquitto_subjectAltName": [
@@ -27,8 +27,8 @@
         "expiry": {
             "days": 90
         },
-        "signcert": "/ca/certs/SIGN.crt",
-        "signkey": "/ca/private/SIGN.key",
+        "signcert": "/ca/certs/sign.crt",
+        "signkey": "/ca/private/sign.key",
         "signkey_password": null
     },
     "monitor": {

@@ -52,8 +52,28 @@ def run(certfile: str, keyfile: str, mq: mqtt.Client):
         logger.critical("Unable to load certificate")
         raise ValueError(cert)
 
+    monitor_config = config.get_config("monitor")
+    mqtt_config = config.get_config("mqtt")
+    now_timestamp = datetime.now(timezone.utc)
+
     cert_cn = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
     logger.debug("Certificate CN:{}".format(cert_cn))
+    cert_expiry = cert.not_valid_after.replace(tzinfo=timezone.utc)
+    logger.debug("Certificate expiry:{}".format(cert_expiry.isoformat()))
+    cert_timeleft = cert_expiry - now_timestamp
+    logger.debug("Timeleft: {}".format(cert_timeleft))
+    while cert_timeleft > timedelta(
+        days=monitor_config['refresh']['days'],
+        hours=monitor_config['refresh']['hours'],
+        minutes=monitor_config['refresh']['minutes'],
+    ):
+        sleep_time = cert_timeleft - timedelta(
+            days=monitor_config['refresh']['days'],
+            hours=monitor_config['refresh']['hours'],
+            minutes=monitor_config['refresh']['minutes'],
+        )
+        logger.info("Waiting {}s until refresh time".format(sleep_time.total_seconds()))
+        time.sleep(sleep_time.total_seconds())
 
     mq.message_callback_add('mqtt-ca/{}/cert'.format(cert_cn), renew_cert)
     mq.subscribe('mqtt-ca/{}/cert'.format(cert_cn), options=mqtt.SubscribeOptions(qos=0, retainHandling=mqtt.SubscribeOptions.RETAIN_DO_NOT_SEND))
@@ -65,8 +85,6 @@ def run(certfile: str, keyfile: str, mq: mqtt.Client):
     global new_cert
     csr_sign_algo = None
 
-    monitor_config = config.get_config("monitor")
-    mqtt_config = config.get_config("mqtt")
     mqtt_keyfile_password = None
     if "keyfile_password" in mqtt_config.keys():
         mqtt_keyfile_password = mqtt_config['keyfile_password']
@@ -112,6 +130,7 @@ def run(certfile: str, keyfile: str, mq: mqtt.Client):
             
         # received signed cert
         # make sure cert matches the key
+        logger.debug("Received new certificate")
         if cert_received.public_key() != new_key.public_key():
             logger.error("MQTT-CA sent certificate from different key?")
             logger.debug("Received cert:{}".format(cert_received))
@@ -140,8 +159,7 @@ def run(certfile: str, keyfile: str, mq: mqtt.Client):
     os.rename("{}.new".format(certfile),certfile)
     
     # bump MQTT session to use new keys
-    mq.disconnect()
-    mqconn.connect(mq)
+    mq.reconnect()
 
     cert_received = False
     csr_sent = False

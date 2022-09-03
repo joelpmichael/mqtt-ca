@@ -10,18 +10,10 @@ import paho.mqtt.client as mqtt
 
 mq = mqtt.Client(protocol=mqtt.MQTTv5)
 
-import io
-import threading
 import time  # for time.sleep
 from datetime import datetime as datetime
 from datetime import timedelta
 from datetime import timezone as timezone
-
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ed448, ed25519, rsa
-from cryptography.hazmat.primitives.serialization import Encoding
-from cryptography.x509.oid import NameOID
 
 
 def monitor_on_connect(client: mqtt.Client, userdata, flags, reasonCode, properties):
@@ -136,26 +128,5 @@ def run(args):
                 now_timestamp - ca_timestamp,
             ))
         
-        # load certificate
-        cert = None
-        with io.FileIO(config.conf['mqtt']['certfile'], "r") as cert_file:
-            cert = x509.load_pem_x509_certificate(cert_file.readall())
-        
-        if cert == None:
-            logger.critical("Unable to load certificate")
-            raise ValueError(cert)
-
-        cert_cn = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
-        logger.debug("Certificate CN:{}".format(cert_cn))
-        cert_expiry = cert.not_valid_after.replace(tzinfo=timezone.utc)
-        logger.debug("Certificate expiry:{}".format(cert_expiry.isoformat()))
-        if cert_expiry < (now_timestamp + timedelta(
-            days=monitor_config['refresh']['days'],
-            hours=monitor_config['refresh']['hours'],
-            minutes=monitor_config['refresh']['minutes'],
-        )):
-            # refresh cert
-            renew.run(config.conf['mqtt']['certfile'], config.conf['mqtt']['keyfile'], mq)
-
-        mq.disconnect()
-        mq.loop_stop()
+        # refresh cert
+        renew.run(config.conf['mqtt']['certfile'], config.conf['mqtt']['keyfile'], mq)

@@ -151,6 +151,8 @@ then
     fi
 fi
 
+echo "Starting MONITOR for Mosquitto TLS cert"
 /app/mqtt-ca.py --config=/app/config.json --log-level=INFO --log-dest=/ca/monitor-mosquitto.log monitor /ca/certs/mosquitto.crt /ca/private/mosquitto.key
 
+echo "Starting RUN command: $@"
 exec "$@"

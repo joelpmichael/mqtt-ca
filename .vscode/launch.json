@@ -11,6 +11,30 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Python: Daemon Mode",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mqtt-ca.py",
+            "args": [
+                "daemon"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Monitor Mode",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mqtt-ca.py",
+            "args": [
+                "monitor",
+                "cert",
+                "key"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
