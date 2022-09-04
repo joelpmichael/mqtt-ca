@@ -116,6 +116,7 @@ def run(certfile: str, keyfile: str, mq: mqtt.Client):
         
     new_csr = new_csr.sign(new_key, csr_sign_algo)
 
+    global csr_sent
     csr_sent = True
     logger.info("Sending CSR to MQTT-CA")
     mq.publish('mqtt-ca/{}/csr'.format(cert_cn), new_csr.public_bytes(Encoding.DER), qos=1, retain=True)
@@ -129,14 +130,7 @@ def run(certfile: str, keyfile: str, mq: mqtt.Client):
             time.sleep(10)
             
         # received signed cert
-        # make sure cert matches the key
-        logger.debug("Received new certificate")
-        if cert_received.public_key() != new_key.public_key():
-            logger.error("MQTT-CA sent certificate from different key?")
-            logger.debug("Received cert:{}".format(cert_received))
-            cert_received = None
-            continue
-        
+        logger.debug("Received new certificate")        
         cert_valid = True
         break
 
