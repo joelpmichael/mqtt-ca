@@ -14,10 +14,11 @@
     },
     "log": {
         "output": "CONSOLE",
-        "level": "DEBUG"
+        "level": "INFO"
     },
     "daemon": {
         "mosquitto_subjectAltName": [
+            "DNS:mosquitto",
             "DNS:localhost",
             "IP:127.0.0.1",
             "IP:::1",
